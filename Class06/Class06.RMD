@@ -1,0 +1,174 @@
+---
+title: "Class 6 R Functions"
+author: "Gidsela Luna"
+date: "January 25, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## File Reading
+
+Here we try to use **read.table** and friends to input some data into R 
+you can view any function in the console without any parenthesis 
+
+
+Lets insert a code chunk (insert using option-commdand-I)
+```{r}
+read.table("https://bioboot.github.io/bggn213_S18/class-material/test1.txt",header=TRUE,sep=",")
+
+```
+
+```{r}
+
+read.table("https://bioboot.github.io/bggn213_S18/class-material/test2.txt",header=TRUE,sep="$")
+
+
+```
+```{r}
+data3<-read.table("https://bioboot.github.io/bggn213_S18/class-material/test3.txt",sep="")
+data3
+
+
+```
+
+
+## what is a function?
+##name, arguments, body 
+
+My first function 
+
+```{r}
+add <- function(x, y=1) {
+ # Sum the input x and y
+ x + y
+}
+```
+
+Lets use the **add()** function 
+```{r}
+add(1)
+```
+
+```{r}
+add(1,5)
+```
+
+```{r}
+add(c(1,2,3,4))
+```
+```{r}
+add(c(1,2,3,4),4)
+```
+
+```{r}
+#add(1,2,3)
+```
+
+
+```{r}
+#add(x=1,y="b")
+```
+
+```{r}
+rescale <- function(x) {
+ rng <-range(x)
+ (x - rng[1]) / (rng[2] - rng[1])
+}
+```
+
+
+
+```{r}
+rescale(1:10)
+```
+
+```{r}
+rescale( c(1,2,NA,3,10) )
+```
+
+```{r}
+x=range( c(1,2,NA,3,10) )
+x
+```
+
+
+```{r}
+rescale2 <- function(x) {
+ rng <-range(x,na.rm=TRUE)
+ (x - rng[1]) / (rng[2] - rng[1])
+}
+
+```
+```{r}
+x=rescale2( c(1,2,NA,3,10) )
+x
+```
+
+
+
+```{r}
+#rescale2(c(1,10),"string") 
+```
+
+
+```{r}
+rescale3 <- function(x, na.rm=TRUE, plot=FALSE) {
+ if(na.rm) {
+ rng <-range(x, na.rm=na.rm)
+ } else {
+ rng <-range(x)
+ }
+ print("Hello")
+ answer <- (x - rng[1]) / (rng[2] - rng[1])
+ print("is it me you are looking for?")
+ if(plot) {
+ plot(answer, typ="b", lwd=4)
+   print("dont sing again")
+ }
+ print("I can see it in ...")
+}
+```
+
+
+```{r}
+rescale3(1:10,plot=TRUE)
+```
+
+## using the bio3d package
+```{r}
+library(bio3d)
+```
+
+```{r}
+pdb<-read.pdb("1hbs")
+```
+
+```{r}
+# what is this PDB sort of thing?
+pdb
+```
+
+
+
+```{r}
+library(bio3d)
+s1 <- read.pdb("4AKE") # kinase with drug
+s2 <- read.pdb("1AKE") # kinase no drug
+s3 <- read.pdb("1E4Y") # kinase with drug
+s1.chainA <- trim.pdb(s1, chain="A", elety="CA")
+s2.chainA <- trim.pdb(s2, chain="A", elety="CA")
+s3.chainA <- trim.pdb(s3, chain="A", elety="CA")
+s1.b <- s1.chainA$atom$b
+s2.b <- s2.chainA$atom$b
+s3.b <- s3.chainA$atom$b
+plotb3(s1.b, sse=s1.chainA, typ="l", ylab="Bfactor")
+plotb3(s2.b, sse=s2.chainA, typ="l", ylab="Bfactor")
+plotb3(s3.b, sse=s3.chainA, typ="l", ylab="Bfactor")
+```
+
+
+
+

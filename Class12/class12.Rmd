@@ -1,0 +1,76 @@
+---
+title: "Class 12: Structural Bioinformatics:Drug Discovery"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## GitHub Documents
+
+
+```{r}
+library(bio3d)
+```
+
+#here, lets first download a target(i.e a protein receptor) structure from the main PDB databaes. we will pick up PDB 1D "1hsg"
+```{r}
+pdb.code<-"1hsg"
+file.name<-get.pdb(pdb.code)
+```
+
+#extract the proteiin only segment of this PDB entry and write out a new PDB formation file. We will also do the same for the bound ligand 
+
+```{r}
+hiv<-read.pdb(file.name)
+hiv
+```
+
+#protein extraction first 
+
+```{r}
+prot<-trim.pdb(hiv,"protein")
+prot
+```
+
+```{r}
+prot.file=name<-paste(pdb.code,"_protein.pdb",sep="")
+write.pdb(prot,file= prot.file)
+```
+
+#do the same for the ligand
+```{r}
+lig<-trim.pdb(hiv,"ligand")
+lig
+
+
+```
+
+```{r}
+lig.file=name<-paste(pdb.code,"_ligand.pdb",sep="")
+write.pdb(lig,file= lig.file)
+```
+
+```{r}
+lig
+```
+
+## convert our docking results for viewing in VMD 
+```{r}
+library(bio3d)
+res <- read.pdb("all.pdbqt", multi=TRUE)
+write.pdb(res, "results.pdb")
+res
+```
+
+
+```{r}
+res <- read.pdb("all.pdbqt", multi=TRUE) 
+ori <- read.pdb("ligand.pdbqt")
+rmsd(ori, res)
+```
+
+
+
+

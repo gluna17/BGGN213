@@ -1,0 +1,218 @@
+---
+title: "Class 14"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## GitHub Documents
+
+```{r}
+#data input 
+counts<-read.csv("airway_scaledcounts.csv", stringsAsFactors=FALSE)
+metadata<-read.csv("airway_metadata.csv",stringsAsFactors = FALSE)
+# Want gene names to stay as gene names 
+
+
+```
+
+
+```{r}
+head(counts)
+```
+
+```{r}
+#what are the number of genes
+nrow(counts)
+#what are the number of samples 
+ncol(counts)
+```
+
+
+```{r}
+metadata$id
+colnames(counts)[-1]
+
+all(metadata$id == colnames(counts)[-1])
+```
+
+
+#extract control exp( i.e columns of our **counts** obj based on the metadata**)
+
+```{r}
+control.id<-metadata[metadata[,"dex"]== "control",]$id
+```
+
+#isolate the control counts 
+```{r}
+head(counts[,control.id])
+control<-counts[,control.id]
+rownames(control)<-counts$ensgene
+```
+
+#isolate the treated samples and assign the names 
+#extract the treated IDs 
+
+```{r}
+treated.id<-metadata[metadata[,"dex"]== "treated",]$id
+
+```
+
+
+```{r}
+treated<-counts[,treated.id]
+rownames(treated)<-counts$ensgene
+
+```
+
+#find the mean counts value for each gene in control experiments 
+```{r}
+control.mean<-rowSums(control)/ncol(control)
+head(control.mean)
+```
+
+```{r}
+treated.mean<-rowSums(treated)/ncol(treated)
+head(treated.mean)
+```
+
+#here we are going to combine both of them together 
+```{r}
+mean.counts<-data.frame(control.mean,treated.mean)
+```
+
+
+
+```{r}
+colSums(mean.counts)
+```
+
+```{r}
+plot(mean.counts)
+```
+
+
+
+
+```{r}
+plot(mean.counts,log="xy")
+```
+
+
+
+```{r}
+mean.counts$log2fc<-log2(mean.counts[,"treated.mean"]/mean.counts[,"control.mean"])
+head(mean.counts)
+```
+
+# we need to filter out the zero value genes 
+```{r}
+#mean.counts[,1:2]
+
+zero.vals<-which(mean.counts[,1:2]==0,arr.ind=TRUE)
+head(zero.vals)
+
+to.rm<-unique(zero.vals[,1])
+mycounts<-mean.counts[-to.rm,]
+head(mycounts)
+```
+
+
+```{r}
+up.ind<-mycounts$log2fc >2
+down.ind<-mycounts$log2fc < (-2)
+```
+
+
+```{r}
+sum(up.ind)
+sum(down.ind)
+```
+
+# here, we are going to add annotation data from the ensemble annotation file 
+```{r}
+anno<-read.csv("annotables_grch38.csv")
+head(anno)
+```
+
+#what are the dimmensions of anno
+```{r}
+
+dim(anno)
+```
+
+
+# use the merge function to add our annotation data 
+
+```{r}
+mycounts.anno<-merge(x=mycounts,y=anno,by.x="row.names",by.y = "ensgene")
+head(mycounts.anno)
+```
+
+
+```{r}
+library("AnnotationDbi")
+library("org.Hs.eg.db")
+```
+
+```{r}
+columns(org.Hs.eg.db)
+```
+
+```{r}
+mycounts$symbol <- mapIds(org.Hs.eg.db,
+                     keys=row.names(mycounts),
+                     column="SYMBOL",
+                     keytype="ENSEMBL",
+                     multiVals="first")
+```
+
+```{r}
+head(mycounts)
+```
+
+```{r}
+library("DESeq2")
+```
+
+```{r}
+dds <- DESeqDataSetFromMatrix(countData=counts, 
+                              colData=metadata, 
+                              design=~dex, 
+                              tidy=TRUE)
+```
+
+```{r}
+dds
+```
+
+
+#run DeSeq analysis
+```{r}
+
+dds<-DESeq(dds)
+```
+
+```{r}
+res<-results(dds)
+res
+```
+
+```{r}
+summary(res,alpha=0.01)
+```
+
+```{r}
+plot(res$log2FoldChange,-log(res$padj))
+```
+
+```{r}
+mycols<-rep("gray",nrow(res))
+mycols[abs(res$log2FoldChange) > 2] = "red"
+subset.ind<-res$padj <0.01 & abs(res$log2FoldChange) >2
+mycols[subset.ind] = "blue"
+plot(res$log2FoldChange,-log(res$padj), col=mycols)
+```
+

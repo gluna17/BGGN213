@@ -1,17 +1,12 @@
-class13
+Class13
 ================
 
-GitHub Documents
-----------------
-
 MXL genotype analysis
----------------------
+=====================
 
-How many GIG genotype are there in the 1000 genome data for hte MXL group?
-==========================================================================
+#### How many GIG genotype are there in the 1000 genome data for hte MXL group?
 
-I obtained the input from:
---------------------------
+##### I obtained the input from:
 
 <http://uswest.ensembl.org/Homo_sapiens/Variation/Sample?db=core;r=17:39894595-39895595;v=rs8067378;vdb=variation;vf=362656008#373531_tablePanel>
 
@@ -117,7 +112,7 @@ summary(expr[inds.gg,"exp"])
 boxplot(exp~geno,data=expr,notch=TRUE)
 ```
 
-![](class13_files/figure-markdown_github/unnamed-chunk-10-1.png)
+![](Class13_files/figure-markdown_github/unnamed-chunk-10-1.png)
 
 ``` r
 library(ggplot2)
@@ -126,4 +121,4 @@ ggplot(expr, aes(geno, exp, fill=geno)) +
   geom_jitter(shape=16, position=position_jitter(0.2), alpha=0.4)
 ```
 
-![](class13_files/figure-markdown_github/unnamed-chunk-11-1.png)
+![](Class13_files/figure-markdown_github/unnamed-chunk-11-1.png)

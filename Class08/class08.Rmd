@@ -1,0 +1,264 @@
+---
+title: "class08 Introduction to machine learning for Bioinformatics (Part 1)"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+x <- read.csv("https://bioboot.github.io/bggn213_f17/class-material/UK_foods.csv")
+```
+
+```{r}
+#how many rows are there for this file?
+nrow(x)
+ncol(x)
+```
+
+```{r}
+# How to view the first 6 rows?
+head(x,6)
+```
+
+
+```{r}
+dim(x)
+```
+
+
+```{r}
+#how to eliminate the the uneccesary column 
+
+rownames(x)<-x[,1]
+x<-x[,-1]
+head(x)
+```
+
+```{r}
+#what are the new dimensions for X?
+dim(x)
+```
+
+
+```{r}
+#what is a more safer and efficient way to do this 
+x2<-x <- read.csv("https://bioboot.github.io/bggn213_f17/class-material/UK_foods.csv",row.names = 1)
+x2
+```
+
+
+```{r}
+barplot(as.matrix(x2),beside=TRUE,col=rainbow(nrow(x)))
+```
+```{r}
+barplot(as.matrix(x2),beside=FALSE,col=rainbow(nrow(x)))
+```
+
+
+
+```{r}
+pairs(x, col=rainbow(10), pch=16)
+```
+
+### PCA
+```{r}
+pca<-prcomp(t(x2))
+summary(pca)
+```
+
+
+```{r}
+plot(pca$x[,1], pca$x[,2], xlab="PC1", ylab="PC2", xlim=c(-270,500))
+text(pca$x[,1], pca$x[,2], colnames(x),col=c("orange","red","blue","darkgreen"))
+
+
+```
+
+
+```{r}
+par(mar=c(10, 3, 0.35, 0))
+barplot( pca$rotation[,1], las=2 )
+```
+
+### Hierarchial Clustering 
+
+
+```{r}
+tmp<-c(rnorm(30,-3), rnorm(30,3))
+#mean of -3 or 3, for 30 random numbers for each 
+x<-cbind(x=tmp, y=rev(tmp))
+plot(x)
+
+```
+
+
+
+```{r}
+
+km<-kmeans(x,center=2,nstart=20)
+print(km)
+```
+
+
+```{r}
+#size
+
+km$size
+```
+
+
+
+```{r}
+plot(x,col=km$cluster)
+# col represents the default plotting color 
+points(km$centers,col="blue",pch=15,cex=3)
+# here you are adding the point for the center and altering the graphical parametesr 
+```
+
+#two types of hierachial cluster
+#bottom up, each point starts at its own cluster to eventually just one 
+
+#hierachial clustering in R
+
+
+
+```{r}
+
+ # First we need to calculate point (dis)similarity
+#   as the Euclidean distance between observations
+dist_matrix <- dist(x)
+# The hclust() function returns a hierarchical
+#  clustering model
+hc <- hclust(d = dist_matrix)
+# the print method is not so useful here
+hc
+
+```
+```{r}
+plot(hc)
+abline(h=6,col="red")
+grp2<-cutree(hc,h=6)
+```
+```{r}
+plot(x,col=grp2)
+```
+
+```{r}
+plot(hc)
+abline(h=2.5,col="blue")
+grp6<-cutree(hc,h=2.5)
+table(grp6)
+```
+
+# we can also use k=groups as an argument to cutree!
+
+```{r}
+cutree(hc,k=3)
+```
+
+
+
+```{r}
+d<-dist_matrix
+hc.complete <- hclust(d, method="complete")
+plot(hc.complete)
+hc.average  <- hclust(d, method="average")
+plot(hc.average)
+hc.single   <- hclust(d, method="single")
+plot(hc.single)
+```
+
+
+```{r}
+# Step 1. Generate some example data for clustering
+x <- rbind(
+  matrix(rnorm(100, mean=0, sd = 0.3), ncol = 2),   # c1
+  matrix(rnorm(100, mean = 1, sd = 0.3), ncol = 2), # c2
+  matrix(c(rnorm(50, mean = 1, sd = 0.3),           # c3
+           rnorm(50, mean = 0, sd = 0.3)), ncol = 2))
+colnames(x) <- c("x", "y")
+# Step 2. Plot the data without clustering
+plot(x)
+# Step 3. Generate colors for known clusters
+#         (just so we can compare to hclust results)
+col <- as.factor( rep(c("c1","c2","c3"), each=50) )
+plot(x, col=col)
+```
+
+
+```{r}
+
+#here we are doing tradiontal hierachial clustering 
+y<-dist(x)
+hc2<-hclust(y)
+
+plot(hc2)
+grps2<-cutree(hc2,k=3)
+plot(x,col=grps2)
+```
+
+
+
+
+
+
+```{r}
+mydata <- read.csv("https://tinyurl.com/expression-CSV",
+                        row.names=1)
+head(mydata)
+
+
+
+#NOTE: prcomp() expects the samples to be rows and genes to be columns so we need to first transpose the matrix with the t() function!
+pca<-prcomp(t(mydata),scale=TRUE)
+summary(pca)
+```
+
+#make our first PCA
+
+
+```{r}
+dim(pca$x)
+plot(pca$x[,1],pca$x[,2], xlab="PC1", ylab="PC2")
+```
+
+
+
+
+```{r}
+pca.var <- pca$sdev^2
+pca.var.per <- round(pca.var/sum(pca.var)*100, 1)
+pca.var.per
+```
+
+```{r}
+pca.var <- pca$sdev^2
+pca.var.per <- round(pca.var/sum(pca.var)*100, 1)
+barplot(pca.var.per, main="Scree Plot",
+        xlab="Principal Component", ylab="Percent Variation")
+```
+
+```{r}
+
+colvec <- as.factor( substr( colnames(mydata), 1, 2) )
+plot(pca$x[,1], pca$x[,2], col=colvec, pch=16,
+     xlab=paste0("PC1 (", pca.var.per[1], "%)"),
+     ylab=paste0("PC2 (", pca.var.per[2], "%)"))
+   
+```
+
+```{r}
+
+  plot(pca$x[,1], pca$x[,2], col=colvec, pch=16,
+       xlab=paste0("PC1 (", pca.var.per[1], "%)"),
+       ylab=paste0("PC2 (", pca.var.per[2], "%)"))
+## IN THE CONSOLE! Click to identify which sample is which identify(pca$x[,1], pca$x[,2], labels=colnames(mydata))
+```
+
+
+
+
+
+

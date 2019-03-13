@@ -1,0 +1,224 @@
+---
+title: "Class 15 Pathway Analysis"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## GitHub Documents
+
+```{r message=FALSE}
+library(DESeq2)
+```
+
+####Loading our data files 
+```{r}
+metaFile <- "Data/GSE37704_metadata.csv"
+countFile <- "Data/GSE37704_featurecounts.csv"
+```
+
+```{r}
+colData = read.csv(metaFile, row.names=1)
+head(colData)
+```
+
+
+####Import Count Data 
+```{r}
+countData = read.csv(countFile, row.names=1)
+head(countData)
+```
+
+
+####comparison of rows and columns 
+
+```{r}
+colnames(countData)
+rownames(colData)
+```
+
+> Q. How do we remove the first column of the countData matrix?
+
+```{r}
+nrow(countData)
+dim(countData)
+```
+
+
+```{r}
+countData <-as.matrix(countData[,-1])
+head(countData)
+```
+
+```{r}
+all(rownames(colData)==colnames(countData))
+
+```
+
+```{r}
+head(countData)
+```
+
+#####lets filter out the count data where there are 0 reads across all the samples 
+```{r}
+countData=countData[rowSums(countData)!=0,]
+head(countData)
+```
+
+####How many Genes do we have left 
+```{r}
+nrow(countData)
+```
+
+We now have `r nrow(countData)` genes remaining on our data set 
+
+
+#### Running on DESeq2
+
+```{r}
+dds = DESeqDataSetFromMatrix(countData=countData,
+                             colData=colData,
+                             design=~condition)
+dds=DESeq(dds)
+
+```
+
+```{r}
+dds
+```
+
+```{r}
+res= results(dds, contrast=c("condition","hoxa1_kd", "control_sirna"))
+```
+
+```{r}
+summary(res)
+```
+
+
+#### Lets make a volcano plot of the data 
+
+```{r}
+plot(res$log2FoldChange,-log(res$padj))
+```
+
+#### Adding color 
+```{r}
+
+mycols<- rep("gray",nrow(res))
+mycols[abs(res$log2FoldChange) >2] <- "red"
+inds<-(abs(res$log2FoldChange)>2) & (res$padj < 0.01)
+mycols[inds] <-"blue"
+plot(res$log2FoldChange,-log(res$padj),col=mycols, ylab="-Log(P-Value)", xlab="Log2(FoldChange)")
+```
+
+
+#### Here we are going to add the anotation,gene symbol, and entrez ID 
+
+```{r}
+library("AnnotationDbi")
+library("org.Hs.eg.db")
+
+columns(org.Hs.eg.db)
+
+res$symbol=mapIds(org.Hs.eg.db,keys=row.names(res), keytype="ENSEMBL", column = "SYMBOL", multiVals = "first")
+res$entrez=mapIds(org.Hs.eg.db,keys=row.names(res), keytype="ENSEMBL", column = "ENTREZID", multiVals = "first")
+res$name=mapIds(org.Hs.eg.db,keys=row.names(res), keytype="ENSEMBL", column = "GENENAME", multiVals = "first")
+
+head(res,10)
+
+```
+
+
+```{r}
+res=res[order(res$pvalue),]
+write.csv(res,file="deseq_results.csv")
+```
+
+
+
+
+## Pathway Analysis 
+```{r}
+library(pathview)
+library(gage)
+library(gageData)
+```
+
+```{r}
+data(kegg.sets.hs)
+data(sigmet.idx.hs)
+
+# Focus on signaling and metabolic pathways only
+kegg.sets.hs = kegg.sets.hs[sigmet.idx.hs]
+
+# Examine the first 3 pathways
+head(kegg.sets.hs, 3)
+```
+
+```{r}
+foldchanges= res$log2FoldChange
+names(foldchanges) = res$entrez
+head(foldchanges)
+```
+
+```{r}
+keggres = gage(foldchanges, gsets=kegg.sets.hs)
+```
+
+
+```{r}
+attributes(keggres)
+```
+
+```{r}
+head(keggres$less)
+```
+
+
+
+```{r}
+pathview(gene.data=foldchanges, pathway.id="hsa04110")
+```
+
+if was using a regular text and wanted a [link]()
+
+![](hsa04110.pathview.png)
+
+
+## Gene Ontology 
+```{r}
+data(go.sets.hs)
+data(go.subs.hs)
+
+gobpsets = go.sets.hs[go.subs.hs$BP]
+
+gobpres = gage(foldchanges, gsets=gobpsets, same.dir=TRUE)
+
+
+lapply(gobpres, head)
+```
+
+```{r}
+sig_genes <- res[res$padj <= 0.05 & !is.na(res$padj), "symbol"]
+print(paste("Total number of significant genes:", length(sig_genes)))
+```
+
+```{r}
+write.table(sig_genes, file="significant_genes.txt", row.names=FALSE, col.names=FALSE, quote=FALSE)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+

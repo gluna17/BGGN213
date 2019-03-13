@@ -1,8 +1,5 @@
-Class 14
+Class 14:Transcriptomics and the analysis of RNA-Seq data
 ================
-
-GitHub Documents
-----------------
 
 ``` r
 #data input 

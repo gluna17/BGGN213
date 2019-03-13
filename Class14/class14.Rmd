@@ -1,5 +1,5 @@
 ---
-title: "Class 14"
+title: "Class 14:Transcriptomics and the analysis of RNA-Seq data"
 output: github_document
 ---
 
@@ -7,7 +7,6 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## GitHub Documents
 
 ```{r}
 #data input 

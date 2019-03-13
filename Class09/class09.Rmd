@@ -1,0 +1,180 @@
+---
+title: "class09"
+author: "Gidsela Luna"
+date: "February 8, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+```{r}
+wisc.df<-read.csv("WisconsinCancer.csv")
+
+```
+
+
+```{r}
+head(wisc.df)
+# here we are talking only the columns from 3 tp 32
+#looks like there is a funny last column "X" so lets check how many samples there are 
+
+```
+
+```{r}
+nrow(wisc.df)
+ncol(wisc.df)
+```
+
+```{r}
+# lets take col 3 to 32 fpr further analysis, (i.e dropping the funny x)
+wisc.data<- wisc.df[,3:32]
+head(wisc.data)
+```
+
+```{r}
+# add a patient ID as a wol names of our data 
+
+rownames(wisc.data)<-wisc.df$id
+head(wisc.data)
+
+```
+
+```{r}
+# question, how many cancer vs. non-cancer samples 
+
+table(wisc.df$diagnosis)
+```
+
+
+# question, how many efatures are "mean" values?
+```{r}
+colnames(wisc.data)
+
+```
+```{r}
+length(grep("_mean",colnames(wisc.data)))
+```
+```{r}
+inds<-grep("_mean",colnames(wisc.data))
+colnames(wisc.data)[inds]
+```
+```{r}
+round(apply(wisc.data,2,mean),2)
+```
+
+```{r}
+round(apply(wisc.data,2,sd),2)
+```
+
+
+
+
+# principal componet analysis 
+
+```{r}
+wisc.pr<-prcomp(wisc.data,scale=TRUE)
+summary(wisc.pr)
+```
+
+
+```{r}
+
+plot(wisc.pr$x[,1],wisc.pr$x[,2])
+```
+
+```{r}
+x<-wisc.df$diagnosis
+plot(wisc.pr$x[,1],wisc.pr$x[,2],col=x)
+
+```
+```{r}
+## now lets make a scree-plot for our PCA results 
+# this plat will show the porportion of variance 
+
+pr.var<-wisc.pr$sdev^2
+head(pr.var)
+
+
+```
+
+
+```{r}
+porportion<-round(pr.var/sum(pr.var)*100,2)
+porportion
+```
+
+
+```{r}
+plot(porportion, type="o")
+```
+```{r}
+barplot(porportion,axes=FALSE,names.arg=paste("PC",1:length(porportion)),las=2,ylab="Porportion of Variance")
+axis(2,round(porportion))
+```
+
+
+
+
+## clustering in principal component analysis, happy face for happy days
+## for hclust we need a distance matrix and we get this from the PCA results 
+```{r}
+d<-dist(wisc.pr$x[,1:2])
+wise.pr.hclust<-hclust(d,method="ward.D2")
+plot(wise.pr.hclust)
+
+```
+
+# lets cut our tree into 3 groups 
+```{r}
+
+grp3<-cutree(wise.pr.hclust,k=3)
+table(grp3)
+
+```
+
+
+# lets plot our PCA plot by cluster!
+
+```{r}
+plot(wisc.pr$x[,1],wisc.pr$x[,2],col=grp3,xlab="PC1",ylab="PC2")
+```
+
+# cross tabulation 
+
+```{r}
+
+diagnosis<-wisc.df$diagnosis=="M"
+table(grp3,diagnosis)
+
+
+```
+
+
+```{r}
+table(grp3,wisc.df$diagnosis)
+```
+
+
+
+
+```{r}
+url <- "https://tinyurl.com/new-samples-CSV"
+new <- read.csv(url)
+npc <- predict(wisc.pr, newdata=new)
+npc
+```
+
+
+
+
+```{r}
+plot(wisc.pr$x[,1:2], col=x)
+points(npc[,1], npc[,2], col=c("green","blue"), pch=15,cex=2)
+
+
+```
+
+

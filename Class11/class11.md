@@ -1,13 +1,5 @@
-Untitled
+Structural Bioinformatics Part I
 ================
-
-GitHub Documents
-----------------
-
-This is an R Markdown format used for publishing markdown documents to GitHub. When you click the **Knit** button all R code chunks are run and a markdown file (.md) suitable for publishing to GitHub is generated.
-
-Including Code
---------------
 
 ``` r
 stats<-read.csv("Data Export Summary.csv",row.names=1)
@@ -21,7 +13,7 @@ stats
     ## Other                    250             4                  6    13    273
     ## Multi Method             127             5                  2     1    135
 
-### Q1 determine the percentage of structures solved by X-Ray and Electron Microscopy.
+#### Q1 determine the percentage of structures solved by X-Ray and Electron Microscopy.
 
 ``` r
 pre.by.method<-stats$Total/sum(stats$Total) *100
@@ -34,8 +26,7 @@ pre.by.method
     ##               Other        Multi Method 
     ##          0.18325960          0.09062288
 
-Also can you determine what proportion of structures are protein?
-=================================================================
+#### Also can you determine what proportion of structures are protein?
 
 ``` r
 protein<-sum(stats$Proteins)
@@ -84,6 +75,35 @@ library(devtools)
 devtools::install_bitbucket("Grantlab/bio3d-view")
 ```
 
+    ## Downloading bitbucket repo Grantlab/bio3d-view@master
+
+    ## 
+    ##   
+       checking for file ‘/private/var/folders/d2/8thdglhd1yzc4ty9j4pwhhh00000gn/T/RtmpRM1XLR/remotes464d7526f299/Grantlab-bio3d-view-dd1539876fa8/DESCRIPTION’ ...
+      
+    ✔  checking for file ‘/private/var/folders/d2/8thdglhd1yzc4ty9j4pwhhh00000gn/T/RtmpRM1XLR/remotes464d7526f299/Grantlab-bio3d-view-dd1539876fa8/DESCRIPTION’
+    ## 
+      
+    ─  preparing ‘bio3d.view’:
+    ## 
+      
+       checking DESCRIPTION meta-information ...
+      
+    ✔  checking DESCRIPTION meta-information
+    ## 
+      
+    ─  checking for LF line-endings in source and make files and shell scripts
+    ## 
+      
+    ─  checking for empty or unneeded directories
+    ## 
+      
+    ─  building ‘bio3d.view_0.1.0.9000.tar.gz’
+    ## 
+      
+       
+    ## 
+
 ``` r
 library("bio3d.view")
 view(pdb,"overview",col="sse")
@@ -91,11 +111,7 @@ view(pdb,"overview",col="sse")
 
     ## Computing connectivity from coordinates...
 
-extract the protein only portion of this PDB structure and write it out to a new PDB file
-=========================================================================================
-
-Extract the ligand(i.e) drug
-============================
+extract the protein only portion of this PDB structure and write it out to a new PDB file Extract the ligand(i.e) drug
 
 ``` r
 ca.inds <- atom.select(pdb, "calpha")
@@ -123,9 +139,7 @@ inds.ligand
     ## 
     ## + attr: atom, xyz, call
 
-``` r
-# 45 atoms in our ligand
-```
+### 45 atoms in our ligand
 
 ``` r
 inds.ligand$atom
@@ -337,13 +351,13 @@ modes<-nma(pdb.2)
 ```
 
     ##  Building Hessian...     Done in 0.017 seconds.
-    ##  Diagonalizing Hessian...    Done in 0.094 seconds.
+    ##  Diagonalizing Hessian...    Done in 0.091 seconds.
 
 ``` r
 plot(modes)
 ```
 
-![](class11_files/figure-markdown_github/unnamed-chunk-15-1.png)
+![](class11_files/figure-markdown_github/unnamed-chunk-18-1.png)
 
 ``` r
 m7 <- mktrj(modes,

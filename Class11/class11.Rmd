@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Structural Bioinformatics Part I"
 output: github_document
 ---
 
@@ -7,12 +7,103 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## GitHub Documents
-
-This is an R Markdown format used for publishing markdown documents to GitHub. When you click the **Knit** button all R code chunks are run and a markdown file (.md) suitable for publishing to GitHub is generated.
 
 ```{r}
-x<-read.csv("Data Export Summary.csv",header=TRUE)
+stats<-read.csv("Data Export Summary.csv",row.names=1)
+stats
 
+```
+
+####Q1 determine the percentage of structures solved by X-Ray and Electron Microscopy.
+```{r}
+pre.by.method<-stats$Total/sum(stats$Total) *100
+names(pre.by.method) <-rownames(stats)
+pre.by.method
+```
+
+####Also can you determine what proportion of structures are protein?
+
+
+```{r}
+protein<-sum(stats$Proteins)
+round((protein/sum(stats$Total)*100),1)
+```
+
+```{r}
+library("bio3d")
+```
+
+```{r}
+pdb<-read.pdb("1hsg")
+```
+
+```{r}
+pdb
+```
+
+```{r}
+library(devtools)
+devtools::install_bitbucket("Grantlab/bio3d-view")
+```
+
+
+
+```{r}
+library("bio3d.view")
+view(pdb,"overview",col="sse")
+```
+
+extract the protein only portion of this PDB structure and write it out to a new PDB file
+Extract the ligand(i.e) drug
+```{r}
+ca.inds <- atom.select(pdb, "calpha")
+ca.inds
+```
+
+```{r}
+inds.ligand<-atom.select(pdb,"ligand")
+inds.ligand
+```
+
+### 45 atoms in our ligand
+```{r}
+inds.ligand$atom
+```
+
+```{r}
+pdb$atom$resid
+```
+
+```{r}
+ligand.pdb<-trim.pdb(pdb,inds.ligand)
+ligand.pdb
+```
+
+```{r}
+view(ligand.pdb)
+```
+
+```{r}
+write.pdb(ligand.pdb,file="ligand.pdb")
+```
+
+```{r}
+pdb.2<-read.pdb("1Hel")
+```
+
+```{r}
+#normal mode analysis
+modes<-nma(pdb.2)
+```
+
+```{r}
+plot(modes)
+```
+
+```{r}
+m7 <- mktrj(modes,
+ mode=7,
+ file="mode_7.pdb")
+view(m7, col=vec2color( rmsf(m7) ))
 ```
 

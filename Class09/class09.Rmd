@@ -1,13 +1,14 @@
 ---
-title: "class09"
-author: "Gidsela Luna"
-date: "February 8, 2019"
-output: html_document
+title: "Class09 Introduction to Machine Learning"
+output: github_document
+Date:  "February 8, 2019"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+## GitHub Documents
 
 ## R Markdown
 ```{r}

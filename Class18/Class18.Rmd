@@ -10,18 +10,71 @@ knitr::opts_chunk$set(echo = TRUE)
 
 #### Including Code
 
-You can include R code in the document as follows:
+```{r}
+library(bio3d)
+data<-read.fasta("lecture18_sequences (2).fa")
 
-```{r cars}
-summary(cars)
+#P53_wt<-data[["ali"]][1,]
+#P53_mt<-data[["ali"]][2,]
+
+
+#which((P53_mt==P53_wt)== "FALSE")
+
 ```
 
-#### Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+seqaln(data)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+ide <- conserv(data$ali, method="identity")
+mutant.sites <- which(ide < 1) 
+mutant.sites
+
+```
+
+
+```{r}
+gaps <- gap.inspect(data)
+mutant.sites <- mutant.sites[mutant.sites %in% gaps$f.inds]
+
+mutant.sites
+```
+
+
+```{r}
+mutant.names <- paste0(data$ali["P53_wt",mutant.sites],
+                       mutant.sites,
+                       data$ali["P53_mutant",mutant.sites])
+
+mutant.names
+```
+
+```{r}
+## Sequence positions surounding each mutant site
+start.position <- mutant.sites - 8
+end.position <-  mutant.sites + 8
+
+# Blank matrix to store sub-sequences
+store.seqs <- matrix("-", nrow=length(mutant.sites), ncol=17)
+rownames(store.seqs) <- mutant.names
+
+## Extract each sub-sequence
+for(i in 1:length(mutant.sites)) {
+  store.seqs[i,] <- data$ali["P53_mutant",start.position[i]:end.position[i]]
+}
+
+store.seqs
+
+```
+
+```{r}
+## First blank out the gap positions 
+store.seqs[store.seqs == "-"] <- ""
+
+## Output a FASTA file for further analysis
+write.fasta(seqs=store.seqs, ids=mutant.names, file="subsequences.fa")
+```
+
+
+

@@ -1,4 +1,4 @@
-Class13
+Class13: Genome informatics and high throughput sequencing (Part 1)
 ================
 
 MXL genotype analysis

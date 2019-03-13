@@ -1,5 +1,5 @@
 ---
-title: "Class13"
+title: "Class13: Genome informatics and high throughput sequencing (Part 1)"
 output: github_document
 ---
 
